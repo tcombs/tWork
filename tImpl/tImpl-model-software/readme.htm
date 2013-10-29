@@ -1,0 +1,67 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>tImpl model readme</title>
+</head>
+
+<body>
+
+<h4>What to do to run the ACL2 executable from the harness</h4>
+<ol>
+  <li>Build a Java executable (example_harness_vA.jar) from the source code in
+    the example_harness folder<br>
+    Or, run the jar file that is in the zip archive<br>
+    Or, import the zip archive into Eclipse, and run straight from Eclipse</li>
+  <li>Use Proof Pad to build an executable (Proof Pad hammer button) from
+    acl2-component.lisp<br>
+    Put this executable in the Run folder with world.txt and display.htm
+    (already there)</li>
+  <li>Run the example harness</li>
+  <li>Press the Set Executable button in the harness dialog that pops up</li>
+  <li>In the file browser dialog that pops up, navigate to the ACL2 executable, highlight, and press Open</li>
+  <li>Start an HTML browser</li>
+  <li>Enter <font face="Courier New"> localhost:8888</font> as the URL for the HTML browser<br>
+    <i>Note</i>: A firewall dialog may appear, asking for permission to allow network connection
+    localhost. Grant permission.</li>
+  <li>Press the Start button in the harness dialog</li>
+</ol>
+<h4>What happens after you press the Start button</h4>
+<ol>
+  <li> When you enter the localhost URL in the HTML browser, the harness sends a
+    javascript payload to the browser</li>
+  <li> The payload requests an asset from the webserver (namely,
+    localhost:8888/asset)</li>
+  <li> The Java server receives the asset request, runs the ACL2 executable
+    (which reads a file called world.txt and overwrites the file display.htm)</li>
+  <li> The HTML file (display.htm) is delivered to the HTML browser</li>
+  <li> The browser refreshes, displaying the updated display.htm file</li>
+</ol>
+<p>Steps 2 to 5 take place repeatedly, about twice per second, so the HTML
+display gets refreshed at that frame rate.&nbsp;</p>
+<h4>How this relates to Life on a Donut</h4>
+<blockquote>
+  <p><b><i>Software model</i></b>. The example harness and ACL2 component could
+  serve as a model for the Conway
+life automaton software of the tImpl project. The ACL2 portion of the automaton software would read
+  a compact specification of the current state of the grid from
+an input file (playing the role of the file world.txt file in the model). Then it
+  would compute the next generation of the grid, and overwrite the grid
+  specification file with the new generation. Finally, it would write an HTML
+file that (playing the role of the file display.htm). The harness would trigger
+  a refresh in the HTML browser, and a rendering of the new grid would appear in
+  the HTML browser window.</p>
+<p><b><i>Harness modifications</i></b>. Some capabilities for setting up initial grid configurations will need to be
+added to the GUI in the Java server to make it suitable for the automaton
+application. Currently, it has three buttons and an
+editor for the world.txt file. The code supporting these GUI elements is where the
+changes would be
+needed. Adjustments to other parts of the code, such as the frame rate, may also
+be desirable.</p>
+</blockquote>
+
+</body>
+
+</html>
