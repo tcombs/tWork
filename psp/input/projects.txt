@@ -5,9 +5,9 @@
 # should be a file called "myproject.txt" in this folder. Most recent projects should
 # be at the bottom. PSP++ will generate a report for the final project listed, using
 # previous projects as historical data
-iEx0
-iEx1
-iEx2
-iEx3
-iEx4
-iEx5
+colton
+tyler
+jacob
+ryan-s
+ryan-k
+team
