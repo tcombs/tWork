@@ -1,0 +1,58 @@
+name: Tyler Combs
+date: Sep 27, 2013
+program: tImpl
+instructor: Rex Page
+actual added lines: 78
+
+time log:
+	  - date: Nov 10, 2013
+	  start time: 12:31PM
+	  end time: 1:06PM
+	  phase: code
+	  comment: Added file->chr-list, i/o errors caused me to have to reboot my computer
+	  - date: Nov 10, 2013
+	  start time: 2:03PM
+	  end time: 3:06PM
+	  phase: code
+	  comment: defined chrs->num-list, num-list->tree, and main, started coding next-state-tree method to calculate the next state based on current state
+	   - date: Nov 10, 2013
+	  start time: 3:27PM
+	  end time: 4:33PM
+	  phase: code
+	  comment: 
+
+new objects:
+
+     #### file-bundle module ####
+
+	- name: file->chr-list
+	  estimated lines: 4
+	  type: definitions
+
+	- name: chrs->num-list
+	  estimated lines: 4
+	  type: definitions
+
+	- name: num-list->tree
+	  estimated lines: 4
+	  type: definitions
+
+	  
+
+	  - name: main
+	  estimated lines: 4
+	  type: definitions
+
+
+
+defect log:
+	- date: Nov 10, 2013
+	  type: logic
+	  fix time: 4
+	  comment: input method file->chr-list is expecting to return 2 values but only returned 1
+	  - date: Nov 10, 2013
+	  type: logic
+	  fix time: 3
+	  comment: problem with mv return type in file->chr-list messing up chrs->num-list
+
+	 
