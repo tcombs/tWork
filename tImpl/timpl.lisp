@@ -24,7 +24,7 @@
           (file->string file-path state)
      (if error
          (mv error state)
-         (str->chrs str))))
+         (mv (str->chrs str) state))))
 
 (defun coord->key(x y w)
   (+ (* y w) x))
@@ -92,14 +92,37 @@
                                     state)
      (if error
          (mv error state)
-         t)))
+         (mv t state))))
+(defun flat-tree->list(tree)
+  (if (consp tree)
+      (cons (car (car tree)) (flat-tree->list (cdr tree)))
+      nil))
+
+(defun ints->strs(xs)
+  (if (null xs)
+      nil
+      (cons (rat->str (car xs) 10) 
+            (ints->strs (cdr xs)))))
+      
+
+(defun write-game-state (str-list-game-state state) (mv-let (error state)
+          (string-list->file "game-state"
+                             str-list-game-state
+                                    state)
+     (if error
+         (mv error state)
+         (mv t state))))
+
 (defun main(state)
   (let* (
          (old-num-list (chrs->num-list(file->chr-list "game-state" state) nil))
          (w (car old-num-list))
          (h (car (cdr old-num-list)))
          (old-tree (num-list->tree(cdr (cdr old-num-list))))
+         (tree-chars (next-state-tree w h 0 0 old-tree (empty-tree) nil))
+         (new-tree (car tree-chars))
+         (pre-text (chrs->str (cadr tree-chars)))
+         (gen-html (generate-html pre-text state))
          )
      old-tree))
-
 
