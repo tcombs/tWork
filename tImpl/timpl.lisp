@@ -65,11 +65,11 @@
 (defun dead-test(num-alive)
   (= num-alive 3))
 
-(defun next-state-tree(w h x y old-tree new-tree)
+(defun next-state-tree(w h x y old-tree new-tree chrs)
   (if (= x w)
       (if (= y h)
-          new-tree ;end of matrix
-          (next-state-tree w h 0 (+ y 1) old-tree new-tree)) ;end of row, start new row
+          (list new-tree chrs) ;end of matrix
+          (next-state-tree w h 0 (+ y 1) old-tree new-tree (append chrs (list #\NewLine)))) ;end of row, start new row
       (let* (
              (me (coord->key x y w))
              (im-alive (avl-retrieve old-tree me))
@@ -78,12 +78,21 @@
              ) 
         (if im-alive
             (if (alive-test num-neighbors-alive)
-                (next-state-tree w h (+ x 1) y old-tree (avl-insert new-tree me nil))
-                (next-state-tree w h (+ x 1) y old-tree new-tree))
+                (next-state-tree w h (+ x 1) y old-tree (avl-insert new-tree me nil) (append chrs (list #\#))) ;alive
+                (next-state-tree w h (+ x 1) y old-tree new-tree (append chrs (list #\-)))) ;dead
             (if (dead-test num-neighbors-alive)
-                (next-state-tree w h (+ x 1) y old-tree (avl-insert new-tree me nil))
-                (next-state-tree w h (+ x 1) y old-tree new-tree))))))
+                (next-state-tree w h (+ x 1) y old-tree (avl-insert new-tree me nil) (append chrs (list #\#))) ;alive
+                (next-state-tree w h (+ x 1) y old-tree new-tree (append chrs (list #\-)))))))) ;dead
 
+(defun generate-html(str-pre-txt state)
+  (mv-let (error state)
+          (string-list->file "input.html"
+              (list "<html><body><pre>" str-pre-txt
+                    "</pre></body></html>")
+                                    state)
+     (if error
+         (mv error state)
+         t)))
 (defun main(state)
   (let* (
          (old-num-list (chrs->num-list(file->chr-list "game-state" state) nil))
