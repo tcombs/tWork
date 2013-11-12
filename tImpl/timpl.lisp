@@ -93,6 +93,7 @@
      (if error
          (mv error state)
          (mv t state))))
+
 (defun flat-tree->list(tree)
   (if (consp tree)
       (cons (car (car tree)) (flat-tree->list (cdr tree)))
@@ -113,16 +114,29 @@
          (mv error state)
          (mv t state))))
 
-(defun main(state)
-  (let* (
-         (old-num-list (chrs->num-list(file->chr-list "game-state" state) nil))
+(defun input-str->output-strs(input-str)
+   (let* (
+         (old-num-list (chrs->num-list (str->chrs input-str) nil))
          (w (car old-num-list))
          (h (car (cdr old-num-list)))
          (old-tree (num-list->tree(cdr (cdr old-num-list))))
          (tree-chars (next-state-tree w h 0 0 old-tree (empty-tree) nil))
          (new-tree (car tree-chars))
-         (pre-text (chrs->str (cadr tree-chars)))
-         (gen-html (generate-html pre-text state))
          )
-     old-tree))
+     (ints->strs (flat-tree->list (avl-flatten new-tree)))))
 
+(defun main (state)
+  (mv-let (input-as-string error-open state)
+          (file->string "game-state" state)
+     (if error-open
+         (mv error-open state)
+         (mv-let (error-close state)
+                 (string-list->file "game-state"
+                                    (input-str->output-strs input-as-string)
+                                    state)
+            (if error-close
+                (mv error-close state)
+                (mv (string-append "input file: "
+                     (string-append "game-state"
+                      (string-append ", output file: " "game-state")))
+                    state))))))
