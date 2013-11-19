@@ -67,7 +67,7 @@
 
 (defun next-state-tree(w h x y old-tree new-tree chrs)
   (if (= x w)
-      (if (= y h)
+      (if (= y (- h 1))
           (list new-tree chrs) ;end of matrix
           (next-state-tree w h 0 (+ y 1) old-tree new-tree (append chrs (list #\NewLine)))) ;end of row, start new row
       (let* (
@@ -123,7 +123,7 @@
          (tree-chars (next-state-tree w h 0 0 old-tree (empty-tree) nil))
          (new-tree (car tree-chars))
          )
-     (ints->strs (flat-tree->list (avl-flatten new-tree)))))
+     (ints->strs (cons w (cons h (flat-tree->list (avl-flatten new-tree)))))))
 
 ;(defun main (state)
 ;  (mv-let (input-as-string error-open state)
@@ -141,18 +141,16 @@
 ;                      (string-append ", output file: " "game-state")))
 ;                    state))))))
 
-(defun main (f-in f-out state)
+(defun main (state)
   (mv-let (input-as-string error-open state)
-          (file->string f-in state)
+          (file->string "game-state.txt" state)
      (if error-open
          (mv error-open state)
          (mv-let (error-close state)
-                 (string-list->file f-out
+                 (string-list->file "game-state.txt"
                                     (input-str->output-strs input-as-string)
                                     state)
             (if error-close
                 (mv error-close state)
-                (mv (string-append "input file: "
-                     (string-append f-in
-                      (string-append ", output file: " f-out)))
+                (mv (input-str->output-strs input-as-string)
                     state))))))
