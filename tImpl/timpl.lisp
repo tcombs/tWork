@@ -84,15 +84,8 @@
                 (next-state-tree w h (+ x 1) y old-tree (avl-insert new-tree me nil) (append chrs (list #\#))) ;alive
                 (next-state-tree w h (+ x 1) y old-tree new-tree (append chrs (list #\-)))))))) ;dead
 
-(defun generate-html(str-pre-txt state)
-  (mv-let (error state)
-          (string-list->file "input.html"
-              (list "<html><body><pre>" str-pre-txt
-                    "</pre></body></html>")
-                                    state)
-     (if error
-         (mv error state)
-         (mv t state))))
+(defun generate-html(str-pre-txt)
+   (string-append (string-append "<html><head><title>game</title></head><body><pre>" str-pre-txt) "</pre></body></html>"))
 
 (defun flat-tree->list(tree)
   (if (consp tree)
@@ -122,24 +115,24 @@
          (old-tree (num-list->tree(cdr (cdr old-num-list))))
          (tree-chars (next-state-tree w h 0 0 old-tree (empty-tree) nil))
          (new-tree (car tree-chars))
+         (pre-text (cadr tree-chars))
          )
-     (ints->strs (cons w (cons h (flat-tree->list (avl-flatten new-tree)))))))
+     (list (ints->strs (cons w (cons h (flat-tree->list (avl-flatten new-tree))))) pre-text)))
 
-;(defun main (state)
-;  (mv-let (input-as-string error-open state)
-;          (file->string "game-state" state)
-;     (if error-open
-;         (mv error-open state)
-;         (mv-let (error-close state)
-;                 (string-list->file "game-state"
-;                                    (input-str->output-strs input-as-string)
-;                                    state)
-;            (if error-close
-;                (mv error-close state)
-;                (mv (string-append "input file: "
-;                     (string-append "game-state"
-;                      (string-append ", output file: " "game-state")))
-;                    state))))))
+(defun main2 (state)
+   
+  (mv-let (input-as-string error-open state)
+          (file->string "game-state.txt" state)
+     (if error-open
+         (mv error-open state)
+         (mv-let (error-close state)
+                 (string-list->file "game-state.html"
+                                    (list (generate-html (chrs->str (cadr (input-str->output-strs input-as-string)))))
+                                    state)
+            (if error-close
+                (mv error-close state)
+                (mv (input-str->output-strs input-as-string)
+                    state))))))
 
 (defun main (state)
   (mv-let (input-as-string error-open state)
@@ -148,9 +141,10 @@
          (mv error-open state)
          (mv-let (error-close state)
                  (string-list->file "game-state.txt"
-                                    (input-str->output-strs input-as-string)
+                                    (car (input-str->output-strs input-as-string))
                                     state)
             (if error-close
                 (mv error-close state)
-                (mv (input-str->output-strs input-as-string)
-                    state))))))
+                (main2 state))))))
+
+
