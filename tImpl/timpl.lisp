@@ -125,18 +125,34 @@
          )
      (ints->strs (flat-tree->list (avl-flatten new-tree)))))
 
-(defun main (state)
+;(defun main (state)
+;  (mv-let (input-as-string error-open state)
+;          (file->string "game-state" state)
+;     (if error-open
+;         (mv error-open state)
+;         (mv-let (error-close state)
+;                 (string-list->file "game-state"
+;                                    (input-str->output-strs input-as-string)
+;                                    state)
+;            (if error-close
+;                (mv error-close state)
+;                (mv (string-append "input file: "
+;                     (string-append "game-state"
+;                      (string-append ", output file: " "game-state")))
+;                    state))))))
+
+(defun main (f-in f-out state)
   (mv-let (input-as-string error-open state)
-          (file->string "game-state" state)
+          (file->string f-in state)
      (if error-open
          (mv error-open state)
          (mv-let (error-close state)
-                 (string-list->file "game-state"
+                 (string-list->file f-out
                                     (input-str->output-strs input-as-string)
                                     state)
             (if error-close
                 (mv error-close state)
                 (mv (string-append "input file: "
-                     (string-append "game-state"
-                      (string-append ", output file: " "game-state")))
+                     (string-append f-in
+                      (string-append ", output file: " f-out)))
                     state))))))
