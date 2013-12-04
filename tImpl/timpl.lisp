@@ -119,47 +119,17 @@
          )
      (list (ints->strs (cons w (cons h (flat-tree->list (avl-flatten new-tree))))) pre-text)))
 
-(defun main2 (state)
-   
-  (mv-let (input-as-string error-open state)
-          (file->string "game-state.txt" state)
-     (if error-open
-         (mv error-open state)
-         (mv-let (error-close state)
-                 (string-list->file "game-state.html"
-                                    (list (generate-html (chrs->str (cadr (input-str->output-strs input-as-string)))))
-                                    state)
-            (if error-close
-                (mv error-close state)
-                (mv (input-str->output-strs input-as-string)
-                    state))))))
-
-(defun main (state)
-  (mv-let (input-as-string error-open state)
-          (file->string "game-state.txt" state)
-     	
-     (if error-open
-         (mv error-open state)
-         (mv-let (error-close state)
-                 (string-list->file "game-state.txt"
-                                    (car (input-str->output-strs input-as-string))
-                                    state)
-            (if error-close
-                (mv error-close state)
-                (main2 state))))))
 
 (defun update-display (html state)
    (mv-let (error-wr-display state)
            (string-list->file "game-state.html" html state)
       (if error-wr-display
-          (mv error-wr-display state)
-          (mv "display updated" state))))
+          (mv error-wr-display 3 state)
+          (mv "display updated" 3 state))))
 
-(defun ipo (state)
-  (mv-let (in-string err state)                     ; retrieve state of world
+(defun main (state)
+  (mv-let (in-string err state)                   ; retrieve state of world
 	     (file->string "game-state.txt" state)
-     (if (and (atom in-string) (not (null in-string)))
-         (mv in-string err state)               ; error - file *w* missing
          (let* (
   			 (data (input-str->output-strs in-string)) ; update world
                 (new-state (car data))
@@ -168,5 +138,5 @@
                (mv-let (error-wr-nw state)
                        (string-list->file "game-state.txt" new-state state)
                   (if error-wr-nw
-                      (mv error-wr-nw state)        ; update display
-                      (update-display new-html state)))))))
+                      (mv error-wr-nw err state)        ; update display
+                      (update-display new-html state))))))
