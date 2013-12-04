@@ -13,7 +13,7 @@
 (defun chrs->num-list(cs acc)
   (if (consp cs)
       (if (equal #\NewLine (car cs))
-          (cons (str->rat (chrs->str acc)) 
+          (cons (str->rat (chrs->str acc))
                 (chrs->num-list (cdr cs) nil))
           (chrs->num-list (cdr cs) (append acc (list (car cs)))))
       (if (null acc) nil
@@ -85,7 +85,7 @@
                 (next-state-tree w h (+ x 1) y old-tree new-tree (append chrs (list #\-)))))))) ;dead
 
 (defun generate-html(str-pre-txt)
-   (string-append (string-append "<html><head><title>game</title></head><body><pre>" str-pre-txt) "</pre></body></html>"))
+   (string-append (string-append "<html><style>pre{line-height: 10px}</style><head><title>game</title></head><body><pre>" str-pre-txt) "</pre></body></html>"))
 
 (defun flat-tree->list(tree)
   (if (consp tree)
@@ -137,6 +137,7 @@
 (defun main (state)
   (mv-let (input-as-string error-open state)
           (file->string "game-state.txt" state)
+     	
      (if error-open
          (mv error-open state)
          (mv-let (error-close state)
@@ -146,5 +147,3 @@
             (if error-close
                 (mv error-close state)
                 (main2 state))))))
-
-
