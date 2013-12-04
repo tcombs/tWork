@@ -28,6 +28,7 @@
 
 (defun coord->key(x y w)
   (+ (* y w) x))
+
 (defun get-neighbor-keys(x y w h)
   (list
    (coord->key (mod (- x 1) w) (mod (- y 1) h) w)
@@ -51,6 +52,12 @@
    ;(i-1 mod h, j)
    ))
 
+(defun flat-tree->list(tree)
+  (if (consp tree)
+      (cons (car (car tree)) (flat-tree->list (cdr tree)))
+      nil))
+
+
 (defun number-alive(keys tree) 
   (if (consp keys)
       (if (avl-retrieve tree (car keys))
@@ -64,6 +71,39 @@
 
 (defun dead-test(num-alive)
   (= num-alive 3))
+
+(defun list->set (xs acc-tree) 
+   (if (consp xs)
+       (list->set (cdr xs) (avl-insert acc-tree (car xs) nil))
+       (flat-tree->list(avl-flatten acc-tree))))
+
+(defun generate-nodes-to-check (list-alive-nodes w h)
+   (if (consp list-alive-nodes)
+	(append (cons (car list-alive-nodes) (get-neighbor-keys (- (car list-alive-nodes) (* (floor (car list-alive-nodes) w) w)) (floor (car list-alive-nodes) w) w h))
+   	(generate-nodes-to-check (cdr list-alive-nodes)  w h))
+       nil)
+)
+
+(defun get-next-state-tree (old-tree new-tree nodes w h)
+   (if (consp nodes)
+       (let*
+       	(
+        		(me (car nodes))
+        		(im-alive (avl-retrieve old-tree me))
+          	(neighbors (get-neighbor-keys (mod me w) (ceiling  me h) w h))
+          	(num-neighbors-alive (number-alive neighbors old-tree))
+       	)
+        (if im-alive
+            (if (alive-test num-neighbors-alive)
+                (get-next-state-tree old-tree (avl-insert new-tree me nil) (cdr nodes) w h)
+                (get-next-state-tree old-tree new-tree (cdr nodes) w h))
+            (if (dead-test num-neighbors-alive)
+                (get-next-state-tree old-tree (avl-insert new-tree me nil) (cdr nodes) w h)
+                (get-next-state-tree old-tree new-tree (cdr nodes) w h))
+            )
+       )
+       new-tree)
+)
 
 (defun next-state-tree(w h x y old-tree new-tree chrs)
   (if (= x w)
@@ -84,13 +124,20 @@
                 (next-state-tree w h (+ x 1) y old-tree (avl-insert new-tree me nil) (append chrs (list #\#))) ;alive
                 (next-state-tree w h (+ x 1) y old-tree new-tree (append chrs (list #\-)))))))) ;dead
 
+(defun generate-pre-text (x y w h new-tree chrs)
+    (if (= x w)
+        (if (= y (- h 1))
+            (chrs->str chrs) ;end of matrix
+            (generate-pre-text 0 (+ y 1) w h new-tree (append chrs (list #\NewLine))) ;end of row, move to next row
+            )
+            (if (avl-retrieve new-tree (coord->key x y w))
+                (generate-pre-text (+ x 1) y w h new-tree (append chrs (list #\#))) ;im alive
+                (generate-pre-text (+ x 1) y w h new-tree (append chrs (list #\-))))   ; in the middle of matrix
+))
+
 (defun generate-html(str-pre-txt)
    (string-append (string-append "<html><style>pre{line-height: 10px}</style><head><title>game</title></head><body><pre>" str-pre-txt) "</pre></body></html>"))
 
-(defun flat-tree->list(tree)
-  (if (consp tree)
-      (cons (car (car tree)) (flat-tree->list (cdr tree)))
-      nil))
 
 (defun ints->strs(xs)
   (if (null xs)
@@ -112,20 +159,21 @@
          (old-num-list (chrs->num-list (str->chrs input-str) nil))
          (w (car old-num-list))
          (h (car (cdr old-num-list)))
-         (old-tree (num-list->tree(cdr (cdr old-num-list))))
-         (tree-chars (next-state-tree w h 0 0 old-tree (empty-tree) nil))
-         (new-tree (car tree-chars))
-         (pre-text (cadr tree-chars))
+         (old-tree (num-list->tree (cdr (cdr old-num-list))))
+         (nodes-to-check (list->set (generate-nodes-to-check (flat-tree->list (avl-flatten old-tree)) w h) nil))
+         (new-tree (get-next-state-tree old-tree (empty-tree) nodes-to-check w h))
+         (pre-text (generate-pre-text 0 0 w h new-tree nil))
          )
      (list (ints->strs (cons w (cons h (flat-tree->list (avl-flatten new-tree))))) pre-text)))
+
 
 
 (defun update-display (html state)
    (mv-let (error-wr-display state)
            (string-list->file "game-state.html" html state)
       (if error-wr-display
-          (mv error-wr-display 3 state)
-          (mv "display updated" 3 state))))
+          (mv error-wr-display html state)
+          (mv "display updated" html state))))
 
 (defun main (state)
   (mv-let (in-string err state)                   ; retrieve state of world
@@ -133,7 +181,7 @@
          (let* (
   			 (data (input-str->output-strs in-string)) ; update world
                 (new-state (car data))
-      		 (new-html (list (generate-html (chrs->str (cadr data)))))
+      		 (new-html (list (generate-html (cadr data))))
       		)
                (mv-let (error-wr-nw state)
                        (string-list->file "game-state.txt" new-state state)
