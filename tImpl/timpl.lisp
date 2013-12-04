@@ -147,3 +147,26 @@
             (if error-close
                 (mv error-close state)
                 (main2 state))))))
+
+(defun update-display (html state)
+   (mv-let (error-wr-display state)
+           (string-list->file "game-state.html" html state)
+      (if error-wr-display
+          (mv error-wr-display state)
+          (mv "display updated" state))))
+
+(defun ipo (state)
+  (mv-let (in-string err state)                     ; retrieve state of world
+	     (file->string "game-state.txt" state)
+     (if (and (atom in-string) (not (null in-string)))
+         (mv in-string err state)               ; error - file *w* missing
+         (let* (
+  			 (data (input-str->output-strs in-string)) ; update world
+                (new-state (car data))
+      		 (new-html (list (generate-html (chrs->str (cadr data)))))
+      		)
+               (mv-let (error-wr-nw state)
+                       (string-list->file "game-state.txt" new-state state)
+                  (if error-wr-nw
+                      (mv error-wr-nw state)        ; update display
+                      (update-display new-html state)))))))
