@@ -90,7 +90,7 @@
        	(
         		(me (car nodes))
         		(im-alive (avl-retrieve old-tree me))
-          	(neighbors (get-neighbor-keys (mod me w) (ceiling  me h) w h))
+          	(neighbors (get-neighbor-keys (- me (* (floor me w) w)) (floor me w) w h))
           	(num-neighbors-alive (number-alive neighbors old-tree))
        	)
         (if im-alive
@@ -188,3 +188,4 @@
                   (if error-wr-nw
                       (mv error-wr-nw err state)        ; update display
                       (update-display new-html state))))))
+
