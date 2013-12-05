@@ -1,8 +1,10 @@
+;written in proofpad
 (IN-PACKAGE "ACL2")
 (include-book "io-utilities" :dir :teachpacks)
 (include-book "avl-rational-keys" :dir :teachpacks)
 (include-book "list-utilities" :dir :teachpacks)
 (set-state-ok t)
+
 
 ;input:  xs - a list of numbers
 
