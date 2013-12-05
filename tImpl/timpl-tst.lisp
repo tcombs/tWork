@@ -3,15 +3,37 @@
 (include-book "testing" :dir :teachpacks)
 (include-book "doublecheck" :dir :teachpacks)
 
-(defun nat-listp (xs)
+(defun natural-listp (xs)
   (if (= 1 (len xs))
       (natp (car xs))
       (if (natp (car xs))
-          (nat-listp (cdr xs))
+          (natural-listp (cdr xs))
           nil)))
-(defthm list->set-decreases-length-thm
-   (implies (and (consp xs) (nat-listp xs)) (<= (len xs) (len (list->set xs nil))))
+(defthm always-eight-neighbors-thm
+   (implies (and (natp x) (natp y) (natp w) (natp h))
+            (= (len (get-neighbor-keys x y w h)) 8)))
 
-(defproperty list->set-decreases-length-prop
+(defproperty always-eight-neighbors-prop
+   (x :value (random-natural)
+    y :value (random-natural)
+    w :value (random-natural)
+    h :value (random-natural))
+   (implies (and (natp x) (natp y) (natp w) (natp h))
+            (= (len (get-neighbor-keys x y w h)) 8)))
+
+(defthm coord->key-delivers-natural-number-thm
+   (implies (and (natp x) (natp y) (natp w)) (natp (coord->key x y w))))
+
+(defproperty coord->key-delivers-natural-number-prop
+   (x :value (random-natural)
+    y :value (random-natural)
+    w :value (random-natural))
+   (implies (and (natp x) (natp y) (natp w)) (natp (coord->key x y w))))
+
+(defproperty round-trip-trees-preserve-length-prop
    (xs :value (random-list-of (random-natural)))
-   (<= (len xs) (len (list->set xs nil))))
+   (equal (len xs) (len (flat-tree->list (avl-flatten(num-list->tree xs))))))
+
+(defproperty num-list->tree-is-a-tree-prop
+  (xs :value (random-list-of (random-natural)))
+  (avl-tree? (num-list->tree xs)))

@@ -4,6 +4,8 @@
 (include-book "avl-rational-keys" :dir :teachpacks)
 (include-book "list-utilities" :dir :teachpacks)
 (set-state-ok t)
+(include-book "testing" :dir :teachpacks)
+(include-book "doublecheck" :dir :teachpacks)
 
 
 ;input:  xs - a list of numbers
@@ -12,6 +14,8 @@
 ;	    with each element in the tree in the form of a key value
 ;        pair with x being the key, and nil being the value
 ;        for each x in xs
+
+;O(n*log(n)) where n = len(xs)
 (defun num-list->tree(xs)
   (if (consp xs)
       (avl-insert (num-list->tree (cdr xs)) (car xs) nil)
@@ -22,7 +26,9 @@
 ;        acc - an accumulator that should be nil on the initial call
 
 ;output: a list of numbers that the characters represented
-(defun chrs->num-list(cs acc)
+
+;O(n) where n = len(cs)
+(defun chrs->num-list (cs acc)
   (if (consp cs)
       (if (equal #\NewLine (car cs))
           (cons (str->rat (chrs->str acc))
@@ -36,6 +42,8 @@
 ;        w - width of the gird
 
 ;output: a unique number key representing the coordinate based on x, y, and w
+
+;O(1)
 (defun coord->key(x y w)
   (+ (* y w) x))
 
@@ -46,6 +54,8 @@
 
 ;output: a list of 8 numbers consisting of the 8 adjacent
 ;        cells to the specified coordinate x,y
+
+;O(1)
 (defun get-neighbor-keys(x y w h)
   (list
    (coord->key (mod (- x 1) w) (mod (- y 1) h) w)
@@ -61,6 +71,8 @@
 ;input:  tree - a flat tree, ussually used from a call of (avl-flatten AVLTREE)
 
 ;output: a list of numbers that were in the tree
+
+;O(n) where n is the number of elements in the tree
 (defun flat-tree->list(tree)
   (if (consp tree)
       (cons (car (car tree)) (flat-tree->list (cdr tree)))
@@ -70,6 +82,9 @@
 ;        tree - the current live cell tree
 
 ;output: an integer representing the number of cells in keys, that are also in the tree
+
+;O(n*log(m)) where n is the number of elements in keys
+;and m is the number of elements in the tree
 (defun number-alive(keys tree) 
   (if (consp keys)
       (if (avl-retrieve tree (car keys))
@@ -82,6 +97,8 @@
 
 ;output: t - if the alive cell should remain alive
 ;        nil - if the alive cell should become dead
+
+;O(1)
 (defun alive-test(num-alive)
   (or (= num-alive 2) (= num-alive 3)))
 
@@ -90,6 +107,8 @@
 
 ;output: t - if the dead cell should become alive
 ;        nil - if the dead cell should remain dead
+
+;O(1)
 (defun dead-test(num-alive)
   (= num-alive 3))
 
@@ -98,6 +117,8 @@
 
 ;output: a set of integers in list form
 ;        every element in xs, with duplicates removed
+
+;O(n*log(n)) where n is the number of elements in xs
 (defun list->set (xs acc-tree) 
    (if (consp xs)
        (list->set (cdr xs) (avl-insert acc-tree (car xs) nil))
@@ -110,6 +131,8 @@
 ;output: a set of nodes representing the nodes the program needs to check
 ;        the nodes the program needs to check are each of the currently alive nodes,
 ;        and each of those alive nodes 8 neighbors
+
+;O(n) where n is the number of elements in list-alive-nodes
 (defun generate-nodes-to-check (list-alive-nodes w h)
    (if (consp list-alive-nodes)
 	(append (cons (car list-alive-nodes) (get-neighbor-keys (- (car list-alive-nodes) (* (floor (car list-alive-nodes) w) w)) (floor (car list-alive-nodes) w) w h))
@@ -125,6 +148,10 @@
 
 ;output: a new tree containing all of the live nodes in the next state of the
 ;        game based on the last state of the game.
+
+
+;O(n*log(m)) where n is the number of elements in nodes
+;and m is the number of elements in old-tree
 (defun get-next-state-tree (old-tree new-tree nodes w h)
    (if (consp nodes)
        (let*
@@ -146,7 +173,8 @@
        new-tree)
 )
 
-;input:  x - horizontal coordinate of the grid
+
+;input:  x - horizontal coordinate of tCHARACTER-LISTPhe grid
 ;        y - vertical coordinate of the gird
 ;        w - width of the gird
 ;        h - height of the gird
@@ -156,8 +184,9 @@
 ;output: a string of characters representing the new state of the game
 ;        where each '#' character is a live node and each '-' character
 ;        is a dead node
+
+;O(n) where n = w*h
 (defun generate-pre-text (x y w h new-tree chrs)
-    
     (if (>= x w)
         (if (>= y (- h 1))
             (chrs->str chrs) ;end of matrix
@@ -171,6 +200,8 @@
 ;input:  str-pre-text - a string of pretext that represents the state of the game
 
 ;output: a string that is ready to be placed into an html file and viewd by a browser
+
+;O(1)
 (defun generate-html(str-pre-txt)
    (string-append (string-append "<html><style>pre{line-height: 10px}</style><head><title>game</title></head><body><pre>" str-pre-txt) "</pre></body></html>"))
 
@@ -179,11 +210,13 @@
 ;output: a list of strings where each string is
 ;        the string representation of each value
 ;        x in xs
+
+;O(n) where n = len(xs)
 (defun ints->strs(xs)
-  (if (null xs)
-      nil
+  (if (consp xs)
       (cons (rat->str (car xs) 10) 
-            (ints->strs (cdr xs)))))
+            (ints->strs (cdr xs)))
+      nil))
 
 
 ;input:  input-str - the input string from the game-state.txt file
@@ -197,6 +230,8 @@
 ;        of the live cells in the next state of the game
 ;        and pre-text is the pre-text representation of the
 ;        new state of the game
+
+;O(n) where n = w*h, this is because this method calls generate-pre-text 
 (defun input-str->output-strs(input-str)
    (let* (
          (old-num-list (chrs->num-list (str->chrs input-str) nil))
