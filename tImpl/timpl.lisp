@@ -157,15 +157,16 @@
 ;        where each '#' character is a live node and each '-' character
 ;        is a dead node
 (defun generate-pre-text (x y w h new-tree chrs)
-    (if (= x w)
-        (if (= y (- h 1))
+    
+    (if (>= x w)
+        (if (>= y (- h 1))
             (chrs->str chrs) ;end of matrix
             (generate-pre-text 0 (+ y 1) w h new-tree (append chrs (list #\NewLine))) ;end of row, move to next row
             )
             (if (avl-retrieve new-tree (coord->key x y w))
                 (generate-pre-text (+ x 1) y w h new-tree (append chrs (list #\#))) ;im alive
-                (generate-pre-text (+ x 1) y w h new-tree (append chrs (list #\-))))   ; in the middle of matrix
-))
+                (generate-pre-text (+ x 1) y w h new-tree (append chrs (list #\-)))))   ; in the middle of matrix
+)
 
 ;input:  str-pre-text - a string of pretext that represents the state of the game
 

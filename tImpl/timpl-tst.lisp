@@ -10,7 +10,7 @@
           (nat-listp (cdr xs))
           nil)))
 (defthm list->set-decreases-length-thm
-   (implies (and (consp xs) (nat-listp xs)) (<= (len xs)) (len (list->set xs nil))))
+   (implies (and (consp xs) (nat-listp xs)) (<= (len xs) (len (list->set xs nil))))
 
 (defproperty list->set-decreases-length-prop
    (xs :value (random-list-of (random-natural)))
