@@ -88,7 +88,7 @@
 (defun number-alive(keys tree) 
   (if (consp keys)
       (if (avl-retrieve tree (car keys))
-          (+ 1 (number-alive (cdr keys) tree))
+            (+ 1 (number-alive (cdr keys) tree))
           (number-alive (cdr keys) tree))
       0))
 
